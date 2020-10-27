@@ -193,7 +193,7 @@ var incongruent_stim = [
   },
 ];
 var stims = [].concat(congruent_stim, congruent_stim, incongruent_stim);
-var practice_len = 24;
+var practice_len = 4;
 var practice_stims = jsPsych.randomization.repeat(
   stims,
   practice_len / 12,
