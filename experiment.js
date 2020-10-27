@@ -199,7 +199,7 @@ var practice_stims = jsPsych.randomization.repeat(
   practice_len / 12,
   true
 );
-var exp_len = 96;
+var exp_len = 24;
 var test_stims = jsPsych.randomization.repeat(stims, exp_len / 12, true);
 var choices = [66, 71, 82];
 var exp_stage = "practice";
