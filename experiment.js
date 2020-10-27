@@ -244,7 +244,7 @@ var response_keys =
   '<ul list-text><li><span class = "large" style = "color:red">WORD</span>: "R key"</li><li><span class = "large" style = "color:blue">WORD</span>: "B key"</li><li><span class = "large" style = "color:green">WORD</span>: "G key"</li></ul>';
 
 var feedback_instruct_text =
-  "Welcome to the experiment. This experiment will take about 8 minutes. Press <strong>enter</strong> to begin.";
+  "研究にご参加いただきありがとうございます。 計測を開始するにはいずれかのキーを押して下さい。";
 var feedback_instruct_block = {
   type: "poldrack-text",
   data: {
@@ -262,7 +262,7 @@ var instructions_block = {
     trial_id: "instruction",
   },
   pages: [
-    '<div class = centerbox><p class = block-text>In this experiment you will see "color" words (RED, BLUE, GREEN) appear one at a time. The "ink" of the words also will be colored. For example, you may see: <span class = "large" style = "color:blue">RED</span>, <span class = "large" style = "color:blue">BLUE</span> or <span class = "large" style = "color:red">BLUE</span>.</p><p class = block-text>Your task is to press the button corresponding to the <strong> ink color </strong> of the word. It is important that you respond as quickly and accurately as possible. The response keys are as follows:</p>' +
+    '<div class = centerbox><p class = block-text>この実験では色の(RED, BLUE, GREEN) appear one at a time. The "ink" of the words also will be colored. For example, you may see: <span class = "large" style = "color:blue">RED</span>, <span class = "large" style = "color:blue">BLUE</span> or <span class = "large" style = "color:red">BLUE</span>.</p><p class = block-text>Your task is to press the button corresponding to the <strong> ink color </strong> of the word. It is important that you respond as quickly and accurately as possible. The response keys are as follows:</p>' +
       response_keys +
       "</div>",
   ],
@@ -363,12 +363,12 @@ for (i = 0; i < practice_len; i++) {
     data: practice_stims.data[i],
     key_answer: practice_stims.key_answer[i],
     is_html: true,
-    correct_text:
-      "<div class = fb_box><div class = center-text><font size = 20>Correct!</font></div></div>",
-    incorrect_text:
-      "<div class = fb_box><div class = center-text><font size = 20>Incorrect</font></div></div>",
-    timeout_message:
-      "<div class = fb_box><div class = center-text><font size = 20>Respond Faster!</font></div></div>",
+    // correct_text:
+    //   "<div class = fb_box><div class = center-text><font size = 10>Correct!</font></div></div>",
+    // incorrect_text:
+    //   "<div class = fb_box><div class = center-text><font size = 10>Incorrect</font></div></div>",
+    // timeout_message:
+    //   "<div class = fb_box><div class = center-text><font size = 10>Respond Faster!</font></div></div>",
     choices: choices,
     timing_response: 1500,
     timing_stim: -1,
@@ -396,12 +396,12 @@ for (i = 0; i < exp_len; i++) {
     data: test_stims.data[i],
     key_answer: test_stims.key_answer[i],
     is_html: true,
-    correct_text:
-      "<div class = fb_box><div class = center-text><font size = 20>Correct!</font></div></div>",
-    incorrect_text:
-      "<div class = fb_box><div class = center-text><font size = 20>Incorrect</font></div></div>",
-    timeout_message:
-      "<div class = fb_box><div class = center-text><font size = 20>Respond Faster!</font></div></div>",
+    // correct_text:
+    //   "<div class = fb_box><div class = center-text><font size = 20>Correct!</font></div></div>",
+    // incorrect_text:
+    //   "<div class = fb_box><div class = center-text><font size = 20>Incorrect</font></div></div>",
+    // timeout_message:
+    //   "<div class = fb_box><div class = center-text><font size = 20>Respond Faster!</font></div></div>",
     choices: choices,
     timing_response: 1500,
     timing_stim: -1,
@@ -418,5 +418,5 @@ for (i = 0; i < exp_len; i++) {
   stroop_experiment.push(test_block);
 }
 stroop_experiment.push(attention_node);
-stroop_experiment.push(post_task_block);
+// stroop_experiment.push(post_task_block);
 stroop_experiment.push(end_block);
