@@ -1,0 +1,19 @@
+{
+    "cognitive_atlas_task_id": "tsk_4a57abb949e27",
+    "instructions":"Respond to the stimuli on the screen.",
+    "description":"Expfactory experiment",
+    "url":"https://www.github.com/expfactory-experiments/stroop",
+    "contributors": [
+        "Ian Eisenberg",
+        "Zeynep Enkavi",
+        "Patrick Bissett",
+        "Vanessa Sochat",
+        "Russell Poldrack"
+    ],
+    "exp_id": "stroop",
+    "name": "Stroop",
+    "reference": ["Conditions refers to congruency on each trial",
+                  "http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0057410"],
+    "template": "jspsych",
+    "time": 8
+}
