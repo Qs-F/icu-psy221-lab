@@ -365,19 +365,7 @@
     stimulus: "<p>計測を終了するにはいずれかのキーを押して下さい。</p>" +
       "<p>最後に詳細な結果が表示されます，いずれかのキーを押してデータを保存してください。</p>" +
       `<p>結果を通知してほしい場合，<a href="https://forms.gle/3wBqSCdhevLxVEfJ8" target="_blank">こちらのフォーム</a>よりメールアドレスを登録してください。` +
-      "<p>ご協力いただきましてありがとうございました。</p>" + 
-      `<form id="form" name="${par_info.id}_${new Date().getHours() > 15 ? 'night' : 'morning' }" method="POST" data-netlify="true" netlify>
-        <input type="hidden" name="csv" value="${jsPsych.data.get().csv()}" />
-      </form>`,
-    on_start: () => {
-      $("#form").submit((e) => {
-        e.preventDefault();
-        const $form = $(this);
-        $.post($form.attr("action"), $form.serialize()).then(function() {
-          console.log("uploaded")
-        });
-      })
-    }
+      "<p>ご協力いただきましてありがとうございました。</p>",
   };
 
   timeline.push(debrief_block);
