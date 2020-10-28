@@ -23,14 +23,14 @@ jsPsych.plugins.fullscreen = (function() {
       message: {
         type: jsPsych.plugins.parameterType.STRING,
         pretty_name: 'Message',
-        default: '<p>The experiment will switch to full screen mode when you press the button below</p>',
+        default: '<p>下のボタンを押すことでフルスクリーンモードに変更して計測が始まります。</p>',
         array: false,
         description: 'HTML content to display above the button to enter fullscreen mode.'
       },
       button_label: {
         type: jsPsych.plugins.parameterType.STRING,
         pretty_name: 'Button label',
-        default:  'Continue',
+        default:  '続ける',
         array: false,
         description: 'The text that appears on the button to enter fullscreen.'
       },

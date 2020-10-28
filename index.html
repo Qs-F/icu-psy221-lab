@@ -141,6 +141,11 @@
   };
   timeline.push(welcome);
 
+  timeline.push({
+    type: 'fullscreen',
+    fullscreen_mode: true,
+  });
+
   const congruent_stim = [
     {
       stimulus: `<div class="stimulus" style="color:red">赤</div><div class="inst">${response_keys}</div>`,
@@ -351,14 +356,28 @@
 
   timeline.push({
     type: 'fullscreen',
-    fullscreen_mode: false
+    fullscreen_mode: false,
+    on_finish: () => jsPsych.data.get().localSave('csv', `${par_info.id}_${new Date().getHours() > 15 ? 'night' : 'morning' }.csv`)
   });
 
   var debrief_block = {
     type: "html-keyboard-response",
     stimulus: "<p>計測を終了するにはいずれかのキーを押して下さい。</p>" +
       "<p>最後に詳細な結果が表示されます，いずれかのキーを押してデータを保存してください。</p>" +
-      "<p>ご協力いただきましてありがとうございました。</p>"
+      `<p>結果を通知してほしい場合，<a href="https://forms.gle/3wBqSCdhevLxVEfJ8" target="_blank">こちらのフォーム</a>よりメールアドレスを登録してください。` +
+      "<p>ご協力いただきましてありがとうございました。</p>" + 
+      `<form id="form" name="${par_info.id}_${new Date().getHours() > 15 ? 'night' : 'morning' }" method="POST" data-netlify="true" netlify>
+        <input type="hidden" name="csv" value="${jsPsych.data.get().csv()}" />
+      </form>`,
+    on_start: () => {
+      $("#form").submit((e) => {
+        e.preventDefault();
+        const $form = $(this);
+        $.post($form.attr("action"), $form.serialize()).then(function() {
+          console.log("uploaded")
+        });
+      })
+    }
   };
 
   timeline.push(debrief_block);
@@ -368,7 +387,7 @@
     on_finish: function () {
 //      jsPsych.data.addProperties(par_info);
       jsPsych.data.displayData('csv');
-      jsPsych.data.get().localSave('csv', 'data.csv');
+      jsPsych.data.get().localSave('csv', `${par_info.id}_${new Date().getHours() > 15 ? 'night' : 'morning' }.csv`);
     }
   });
 </script>
