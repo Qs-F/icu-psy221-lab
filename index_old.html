@@ -1,0 +1,62 @@
+<!DOCTYPE html><html class=''>
+  <head>
+    <meta charset='UTF-8'>
+    <meta name="robots" content="noindex">
+    <title>The Experiment Factory stroop</title>
+
+    <link rel='stylesheet' type='text/css' href='jspsych.css'>
+    <link rel='stylesheet' type='text/css' href='default_style.css'>
+    <link rel='stylesheet' type='text/css' href='style.css'>
+  </head>
+
+  <body>
+    <script src='js/jquery.min.js'></script>
+    <script src="js/math.min.js"></script>
+    <script src='js/jspsych/jspsych.js'></script>
+    <script src='js/jspsych/plugins/jspsych-text.js'></script>
+    <script src='js/jspsych/poldrack_plugins/jspsych-poldrack-text.js'></script>
+    <script src='js/jspsych/poldrack_plugins/jspsych-poldrack-instructions.js'></script>
+    <script src='js/jspsych/plugins/jspsych-call-function.js'></script>
+    <script src='js/jspsych/poldrack_plugins/jspsych-attention-check.js'></script>
+    <script src='js/jspsych/poldrack_plugins/jspsych-poldrack-single-stim.js'></script>
+    <script src='js/jspsych/plugins/jspsych-survey-text.js'></script>
+    <script src='js/jspsych/poldrack_plugins/jspsych-single-stim-button.js'></script>
+    <script src='js/jspsych/poldrack_plugins/poldrack_utils.js'></script>
+    <script src='js/jspsych/poldrack_plugins/jspsych-poldrack-categorize.js'></script>
+
+  <script src="jspsych-6.1.0/plugins/jspsych-external-html.js"></script>
+  <script src="jspsych-6.1.0/plugins/jspsych-survey-html-form.js"></script>
+  <script src="jspsych-6.1.0/plugins/jspsych-html-button-response.js"></script>
+  <script src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
+  <!-- 刺激を呈示してキーボードの反応を取得するためのプラグイン -->
+  <!-- <script src="jspsych-6.1.0/plugins/jspsych-image-keyboard-response.js"></script> -->
+  <!-- 刺激をfullscreenで呈示するためのプラグイン -->
+  <!-- <script src="jspsych-6.1.0/plugins/jspsych-fullscreen.js"></script> -->
+  <!-- saveするためのプラグイン -->
+  <script src="jspsych-6.1.0/plugins/jspsych-call-function.js"></script>
+  <link href="jspsych-6.1.0/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+
+
+    <script src="js/platform.js"></script>
+    <script src='experiment.js'></script>
+
+    <script>
+      $( document ).ready(function() {
+
+              jsPsych.init({
+                      timeline: stroop_experiment,
+                      display_element: "getDisplayElement",
+                      fullscreen: true,
+                      on_trial_finish: function(data){
+                              addID('stroop')
+                            },
+
+                      on_finish: function(data){
+                              jsPsych.data.localSave('stroop_results.csv', 'csv');
+                            }
+
+                    });
+            });
+    </script>
+  </body>
+</html>
