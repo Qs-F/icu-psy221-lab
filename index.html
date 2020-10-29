@@ -5,6 +5,9 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
   <title>心理学実験演習</title>
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-firestore.js"></script>
+
   <script src="js/jquery-3.5.1.min.js"></script>
   <script src="js/platform.js"></script>
   <script src="js/hide_cursor.js"></script>
@@ -36,17 +39,21 @@
 
 <body></body>
 <script>
-  const STIM_DURATION = 2500
-  const FIXATION_DURATION = 500
-  const PRACTICE_LEN = 1
-  const EXP_LEN = 1
+  const STIM_DURATION = parseInt(new URLSearchParams(window.location.search).get("stim")) || 2500
+  const FIXATION_DURATION = parseInt(new URLSearchParams(window.location.search).get("fixation")) || 500
+  const PRACTICE_LEN = parseInt(new URLSearchParams(window.location.search).get("practice")) || 4
+  const EXP_LEN = parseInt(new URLSearchParams(window.location.search).get("exp")) || 48
+
+  console.log({
+    STIM_DURATION, FIXATION_DURATION, PRACTICE_LEN, EXP_LEN
+  })
 
   const timeline = [];
   const par_info = {};
 
   const response_keys = '<p>赤: <strong>1</strong> ・ 青: <strong>2</strong> ・ 緑: <strong>3</strong></p>';
 
-  const participantID = jsPsych.randomization.randomID(5);
+  const participantID = window.localStorage.getItem("id") || jsPsych.randomization.randomID(5);
   const par_id = {
     type: 'survey-text',
     questions: [
@@ -69,6 +76,7 @@
     button_label: '次へ',
     on_finish: function (data) {
       par_info.id = JSON.parse(data.responses).Q0
+      window.localStorage.setItem("id", JSON.parse(data.responses).Q0)
     }
   };
   timeline.push(par_id);
@@ -354,10 +362,29 @@
     })
   }
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyAI6uL_F2crPEkUL97KOJ8_-PAvgCP3kiY",
+    authDomain: "dr-student-support.firebaseapp.com",
+    databaseURL: "https://dr-student-support.firebaseio.com",
+    projectId: "dr-student-support",
+    storageBucket: "dr-student-support.appspot.com",
+    messagingSenderId: "347732844507",
+    appId: "1:347732844507:web:53ffda780e3d16936c91fe",
+    measurementId: "G-T9DW6F6XK0"
+  };
+  
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore(app);
+
   timeline.push({
     type: 'fullscreen',
     fullscreen_mode: false,
-    on_finish: () => jsPsych.data.get().localSave('csv', `${par_info.id}_${new Date().getHours() > 15 ? 'night' : 'morning' }.csv`)
+    on_finish: () => {
+      jsPsych.data.get().localSave('csv', `${par_info.id}_${new Date().getHours() > 15 ? 'night' : 'morning' }.csv`)
+      db.collection("psy221").doc(`${par_info.id}_${new Date().getHours() > 15 ? 'night' : 'morning' }.csv`).set({
+        csv: jsPsych.data.get().csv()
+      })
+    }
   });
 
   var debrief_block = {
