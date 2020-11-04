@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <title>心理学実験演習</title>
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-firestore.js"></script>
+
+  <script src="js/jquery-3.5.1.min.js"></script>
+  <script src="js/platform.js"></script>
+  <script src="js/hide_cursor.js"></script>
+  <script src="jspsych-6.1.0/jspsych.js"></script>
+
+  <script src="jspsych-6.1.0/plugins/jspsych-external-html.js"></script>
+  <script src="old_plugins/jspsych-survey-text.js"></script>
+  <script src="jspsych-6.1.0/plugins/jspsych-survey-html-form.js"></script>
+  <script src="jspsych-6.1.0/plugins/jspsych-html-button-response.js"></script>
+  <script src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
+  <script src="jspsych-6.1.0/plugins/jspsych-image-keyboard-response.js"></script>
+  <script src="jspsych-6.1.0/plugins/jspsych-fullscreen.js"></script>
+  <script src="jspsych-6.1.0/plugins/jspsych-call-function.js"></script>
+  <link href="jspsych-6.1.0/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+  <style>
+    .stimulus {
+      font-size: 60px;
+    }
+
+    .inst {
+      position: fixed;
+      display: block;
+      bottom: 40px;
+      left: 0;
+      width: 100vw;
+    }
+  </style>
+</head>
+
+<body></body>
+<script>
+  const STIM_DURATION = parseInt(new URLSearchParams(window.location.search).get("stim")) || 2500
+  const FIXATION_DURATION = parseInt(new URLSearchParams(window.location.search).get("fixation")) || 500
+  const PRACTICE_LEN = parseInt(new URLSearchParams(window.location.search).get("practice")) || 4
+  const EXP_LEN = parseInt(new URLSearchParams(window.location.search).get("exp")) || 48
+
+  console.log({
+    STIM_DURATION, FIXATION_DURATION, PRACTICE_LEN, EXP_LEN
+  })
+
+  const timeline = [];
+  const par_info = {};
+
+  const response_keys = '<p>赤: <strong>1</strong> ・ 青: <strong>2</strong> ・ 緑: <strong>3</strong></p>';
+
+  const participantID = window.localStorage.getItem("id") || jsPsych.randomization.randomID(5);
+  const par_id = {
+    type: 'survey-text',
+    questions: [
+      {
+        prompt: '参加者IDを登録します。既に入力されているIDをそのまま使用してください。<br>' +
+          '参加者IDは問い合わせ時に必要になりますので研究参加後も保管してください。',
+        value: participantID,
+        columns: 15,
+        required: true,
+        name: "participantID"
+      },
+      {
+        prompt: '以下は現在時刻です。',
+        value: new Date().toString(),
+        columns: 15,
+        required: true,
+        name: "date"
+      },
+    ],
+    button_label: '次へ',
+    on_finish: function (data) {
+      par_info.id = JSON.parse(data.responses).Q0
+      window.localStorage.setItem("id", JSON.parse(data.responses).Q0)
+    }
+  };
+  timeline.push(par_id);
+
+  const agreement = {
+    type: 'html-button-response',
+    stimulus: `<p>研究への参加の同意を確認させていただきます．実験者は同意書を提示してください．<br />同意して頂ける場合は次へを押してください．</p>`,
+    choices: ['次へ'],
+  };
+  timeline.push(agreement);
+
+  const facesheet = {
+    type: 'html-button-response',
+    stimulus: `<p>研究に参加していただくにあたり，いくつか回答をお願いしたい項目がございます．<br /><a href="https://forms.gle/bHaL2YWbuQNZTtyT8" target="_blank">こちらのフォーム</a>の回答にご協力をお願いします．<br /><br />研究目的以外でのしようはせず，実験終了後は速やかに破棄致します．</p>`,
+    choices: ['次へ'],
+  };
+  timeline.push(facesheet);
+
+  const gender = {
+    type: 'survey-html-form',
+    preamble: "性別を選択してください",
+    html: '<input type="radio" name="gender" value="1"> 女性(female)'
+      + '<input type="radio" name="gender" value="2"> 男性(male)'
+      + '<input type="radio" name="gender" value="3"> 答えたくない (prefer not to disclose),'
+      + '<div> </div>',
+    button_label: '次へ',
+    on_finish: function (data) {
+      par_info.gender = JSON.parse(data.responses).gender
+    }
+  };
+  timeline.push(gender);
+
+  const gadget = {
+    type: 'survey-text',
+    questions: [
+      {
+        prompt: 'この研究では，参加者間の計測環境の調整を行うため，' +
+          '<br>ご利用のOS（種類とバージョン）とブラウザ（種類とバージョン）情報を取得します。<br>' +
+          '研究目的以外では使用しませんのでご安心ください。<br>' +
+          'あなたのOSバージョンは以下の通りです。',
+        value: [platform.os.toString()],
+        columns: 20,
+        required: true,
+        name: 'os'
+      },
+      {
+        prompt: 'あなたのブラウザ（種類，バージョン）は以下の通りです。<br>よろしければ，そのままお進みください。',
+        value: [platform.name, platform.version],
+        columns: 20,
+        required: true,
+        name: 'bws'
+      },
+    ],
+    button_label: '次へ',
+    on_finish: function (data) {
+      par_info.gadget = jsPsych.data.get().values()[1].responses
+    }
+  };
+  timeline.push(gadget);
+
+  const screen_size = {
+    type: 'survey-text',
+    questions: [
+      {
+        prompt: 'この研究では，参加者間の計測環境の調整を行うため，スクリーンサイズを取得します。<br>' +
+          '研究目的以外では使用しませんのでご安心ください。<br>' +
+          'あなたのモニタサイズ[横，縦（px）]は以下の通りです。よろしければ，そのままお進みください。',
+        value: [window.parent.screen.width, window.parent.screen.height],
+        columns: 15,
+        required: true,
+        name: 'screen'
+      },
+    ],
+    button_label: '次へ',
+    on_finish: function (data) {
+      par_info.scrn_sz = jsPsych.data.get().values()[2].responses // 一時保存
+    }
+  };
+  timeline.push(screen_size);
+
+  const welcome = {
+    type: "html-keyboard-response",
+    stimulus: "それでは，参加者情報の記録は以上です。<br>実験を開始するにはいずれかのキーを押して下さい。"
+  };
+  timeline.push(welcome);
+
+  timeline.push({
+    type: 'fullscreen',
+    fullscreen_mode: true,
+  });
+
+  const congruent_stim = [
+    {
+      stimulus: `<div class="stimulus" style="color:red">赤</div><div class="inst">${response_keys}</div>`,
+      data: {
+        test_part: 'target',
+        correct_response: 49,
+
+        trial_id: "stim",
+        condition: "congruent",
+        stim_color: "red",
+        stim_word: "red",
+      },
+    },
+    {
+      stimulus: `<div class="stimulus" style="color:blue">青</div><div class="inst">${response_keys}</div>`,
+      data: {
+        test_part: 'target',
+        correct_response: 50,
+
+        trial_id: "stim",
+        condition: "congruent",
+        stim_color: "blue",
+        stim_word: "blue",
+      },
+    },
+    {
+      stimulus: `<div class="stimulus" style="color:green">緑</div><div class="inst">${response_keys}</div>`,
+      data: {
+        test_part: 'target',
+        correct_response: 51,
+
+        trial_id: "stim",
+        condition: "congruent",
+        stim_color: "green",
+        stim_word: "green",
+      },
+    },
+  ].map(v => ({
+    ...v,
+    type: "html-keyboard-response",
+    choices: jsPsych.ALL_KEYS,
+    trial_duration: STIM_DURATION,
+    response_ends_trial: false,
+    on_finish: function (data) {
+      data.correct = data.key_press == data.correct_response;
+      data.key = data.key_press
+      if (data.key_press == 46) {
+        jsPsych.endExperiment('The measurement was ended.'); //途中で計測を止めます
+      }
+    },
+  }));
+
+  const incongruent_stim = [
+    {
+      stimulus: `<div class="stimulus" style="color:red">青</div><div class="inst">${response_keys}</div>`,
+      data: {
+        test_part: 'target',
+        correct_response: 49,
+
+        trial_id: "stim",
+        condition: "incongruent",
+        stim_color: "red",
+        stim_word: "blue",
+      },
+    },
+    {
+      stimulus: `<div class="stimulus" style="color:red">緑</div><div class="inst">${response_keys}</div>`,
+      data: {
+        test_part: 'target',
+        correct_response: 49,
+
+        trial_id: "stim",
+        condition: "incongruent",
+        stim_color: "red",
+        stim_word: "green",
+      },
+    },
+    {
+      stimulus: `<div class="stimulus" style="color:blue">赤</div><div class="inst">${response_keys}</div>`,
+      data: {
+        test_part: 'target',
+        correct_response: 50,
+
+        trial_id: "stim",
+        condition: "incongruent",
+        stim_color: "blue",
+        stim_word: "red",
+      },
+    },
+    {
+      stimulus: `<div class="stimulus" style="color:blue">緑</div><div class="inst">${response_keys}</div>`,
+      data: {
+        test_part: 'target',
+        correct_response: 50,
+
+        trial_id: "stim",
+        condition: "incongruent",
+        stim_color: "blue",
+        stim_word: "green",
+      },
+    },
+    {
+      stimulus: `<div class="stimulus" style="color:green">赤</div><div class="inst">${response_keys}</div>`,
+      data: {
+        test_part: 'target',
+        correct_response: 51,
+
+        trial_id: "stim",
+        condition: "incongruent",
+        stim_color: "green",
+        stim_word: "red",
+      },
+    },
+    {
+      stimulus: `<div class="stimulus" style="color:green">青</div><div class="inst">${response_keys}</div>`,
+      data: {
+        test_part: 'target',
+        correct_response: 51,
+
+        trial_id: "stim",
+        condition: "incongruent",
+        stim_color: "green",
+        stim_word: "blue",
+      },
+    },
+  ].map(v => ({
+    ...v,
+    type: "html-keyboard-response",
+    choices: jsPsych.ALL_KEYS,
+    trial_duration: STIM_DURATION,
+    response_ends_trial: false,
+    on_finish: function (data) {
+      data.correct = data.key_press == data.correct_response;
+      data.key = data.key_press
+      if (data.key_press == 46) {
+        jsPsych.endExperiment('The measurement was ended.'); //途中で計測を止めます
+      }
+    },
+  }));
+
+  const stims = [].concat(congruent_stim, congruent_stim, incongruent_stim)
+  const practice_stims = jsPsych.randomization.repeat(stims, PRACTICE_LEN / 12, true)
+  const test_stims = jsPsych.randomization.repeat(stims, EXP_LEN / 12, true)
+
+  const instructions_block = {
+    type: "html-button-response",
+    stimulus: `
+<p>この実験では色を表す漢字（赤・青・緑）が，いずれかの色がついて1つ表示されます。</p>
+<p>例えば，<span class="stimulus" style="color:blue">赤</span> や <span class="stimulus" style = "color:blue">青</span> や <span class="stimulus" style = "color:red">青</span>などです。</p>
+<p>文字が表示されたら，文字の<strong>色</strong>をできるだけ正確かつ素早く回答してください。</p>
+<p>例えば，<span class="stimulus" style="color:red">青</span>であれば，<strong>赤</strong>と回答してください。</p>
+<p>回答の際，目を細めたりせず，自然な状態で回答していただくようお願いします。</p>
+<p>回答するには，それぞれの色について，${response_keys}をキーボードで押してください。</p>`,
+    choices: ['次へ'],
+  }
+  timeline.push(instructions_block)
+
+  const start_practice_block = {
+    type: "html-keyboard-response",
+    stimulus: `
+<p>それでは実験を開始します，練習で行ったように</p>
+<p>解答には${response_keys}を使ってください。</p>
+<p>開始するにはいずれかのキーを押してください。</p>`,
+  }
+
+  const start_test_block = {
+    type: "html-keyboard-response",
+    stimulus: `
+<p>それでは実験を開始します</p>
+<p>解答には${response_keys}を使ってください。</p>
+<p>開始するにはいずれかのキーを押してください。</p>`,
+  }
+
+  const fixation_block = {
+    type: "html-keyboard-response",
+    stimulus: `<div class="stimulus">+</div><div class="inst">${response_keys}</div>`,
+    choices: jsPsych.NO_KEYS,
+    trial_duration: FIXATION_DURATION,
+    data: { test_part: 'fixation' }
+  };
+
+  timeline.push(start_practice_block)
+  for (i = 0; i < PRACTICE_LEN; i++) {
+    timeline.push(fixation_block);
+    timeline.push({
+      type: practice_stims.type[i],
+      stimulus: practice_stims.stimulus[i],
+      data: practice_stims.data[i],
+      choices: practice_stims.choices[i],
+      trial_duration: practice_stims.trial_duration[i],
+      response_ends_trial: practice_stims.response_ends_trial[i],
+      on_finish: practice_stims.on_finish[i],
+    })
+  }
+
+  timeline.push(start_test_block);
+  for (i = 0; i < EXP_LEN; i++) {
+    timeline.push(fixation_block)
+    timeline.push({
+      type: test_stims.type[i],
+      stimulus: test_stims.stimulus[i],
+      data: test_stims.data[i],
+      choices: test_stims.choices[i],
+      trial_duration: test_stims.trial_duration[i],
+      response_ends_trial: test_stims.response_ends_trial[i],
+      on_finish: test_stims.on_finish[i],
+    })
+  }
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAI6uL_F2crPEkUL97KOJ8_-PAvgCP3kiY",
+    authDomain: "dr-student-support.firebaseapp.com",
+    databaseURL: "https://dr-student-support.firebaseio.com",
+    projectId: "dr-student-support",
+    storageBucket: "dr-student-support.appspot.com",
+    messagingSenderId: "347732844507",
+    appId: "1:347732844507:web:53ffda780e3d16936c91fe",
+    measurementId: "G-T9DW6F6XK0"
+  };
+  
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore(app);
+
+  timeline.push({
+    type: 'fullscreen',
+    fullscreen_mode: false,
+    on_finish: () => {
+      jsPsych.data.get().localSave('csv', `${par_info.id}_${new Date().getHours() > 15 ? 'night' : 'morning' }.csv`)
+      db.collection("psy221").doc(`${par_info.id}_${new Date().getHours() > 15 ? 'night' : 'morning' }.csv`).set({
+        csv: jsPsych.data.get().csv()
+      })
+    }
+  });
+
+  var debrief_block = {
+    type: "html-keyboard-response",
+    stimulus: "<p>計測を終了するにはいずれかのキーを押して下さい。</p>" +
+      "<p>最後に詳細な結果が表示されます，いずれかのキーを押してデータを保存してください。</p>" +
+      `<p>結果を通知してほしい場合，<a href="https://forms.gle/3wBqSCdhevLxVEfJ8" target="_blank">こちらのフォーム</a>よりメールアドレスを登録してください。` +
+      "<p>ご協力いただきましてありがとうございました。</p>",
+  };
+
+  timeline.push(debrief_block);
+
+  jsPsych.init({
+    timeline: timeline,
+    on_finish: function () {
+//      jsPsych.data.addProperties(par_info);
+      jsPsych.data.displayData('csv');
+      jsPsych.data.get().localSave('csv', `${par_info.id}_${new Date().getHours() > 15 ? 'night' : 'morning' }.csv`);
+    }
+  });
+</script>
+
+</html>
