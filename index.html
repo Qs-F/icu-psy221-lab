@@ -49,7 +49,6 @@
   })
 
   const notSeries = (list) => {
-    console.log(list.data)
     for (let i = 2; i < list.data.length; i++) {
       if (list.data[i-2].stim_color === list.data[i-1].stim_color && list.data[i-1].stim_color === list.data[i].stim_color) {
         return true
@@ -325,7 +324,6 @@
   const practice_stims = jsPsych.randomization.repeat(stims, PRACTICE_LEN / 12, true)
   let test_stims = jsPsych.randomization.repeat(stims, EXP_LEN / 12, true)
   while (notSeries(test_stims)) {
-    console.log("re")
     test_stims = jsPsych.randomization.repeat(stims, EXP_LEN / 12, true)
   }
 
