@@ -30,7 +30,7 @@
     .inst {
       position: fixed;
       display: block;
-      bottom: 40px;
+      bottom: 120px;
       left: 0;
       width: 100vw;
     }
@@ -47,6 +47,19 @@
   console.log({
     STIM_DURATION, FIXATION_DURATION, PRACTICE_LEN, EXP_LEN
   })
+
+  const notSeries = (list) => {
+    console.log(list.data)
+    for (let i = 2; i < list.data.length; i++) {
+      if (list.data[i-2].stim_color === list.data[i-1].stim_color && list.data[i-1].stim_color === list.data[i].stim_color) {
+        return true
+      }
+      if (list.data[i-2].stim_word === list.data[i-1].stim_word && list.data[i-1].stim_word === list.data[i].stim_word) {
+        return true
+      }
+    }
+    return false
+  }
 
   const timeline = [];
   const par_info = {};
@@ -80,6 +93,20 @@
     }
   };
   timeline.push(par_id);
+
+  const agreement = {
+    type: 'html-button-response',
+    stimulus: `<p>研究への参加の同意を確認させていただきます．実験者は同意書を提示してください．<br />同意して頂ける場合は次へを押してください．</p>`,
+    choices: ['次へ'],
+  };
+  timeline.push(agreement);
+
+  const facesheet = {
+    type: 'html-button-response',
+    stimulus: `<p>研究に参加していただくにあたり，いくつか回答をお願いしたい項目がございます．<br /><a href="https://forms.gle/bHaL2YWbuQNZTtyT8" target="_blank">こちらのフォーム</a>の回答にご協力をお願いします．<br /><br />研究目的以外でのしようはせず，実験終了後は速やかに破棄致します．</p>`,
+    choices: ['次へ'],
+  };
+  timeline.push(facesheet);
 
   const gender = {
     type: 'survey-html-form',
@@ -296,7 +323,11 @@
 
   const stims = [].concat(congruent_stim, congruent_stim, incongruent_stim)
   const practice_stims = jsPsych.randomization.repeat(stims, PRACTICE_LEN / 12, true)
-  const test_stims = jsPsych.randomization.repeat(stims, EXP_LEN / 12, true)
+  let test_stims = jsPsych.randomization.repeat(stims, EXP_LEN / 12, true)
+  while (notSeries(test_stims)) {
+    console.log("re")
+    test_stims = jsPsych.randomization.repeat(stims, EXP_LEN / 12, true)
+  }
 
   const instructions_block = {
     type: "html-button-response",
@@ -305,6 +336,7 @@
 <p>例えば，<span class="stimulus" style="color:blue">赤</span> や <span class="stimulus" style = "color:blue">青</span> や <span class="stimulus" style = "color:red">青</span>などです。</p>
 <p>文字が表示されたら，文字の<strong>色</strong>をできるだけ正確かつ素早く回答してください。</p>
 <p>例えば，<span class="stimulus" style="color:red">青</span>であれば，<strong>赤</strong>と回答してください。</p>
+<p>回答の際，目を細めたりせず，自然な状態で回答していただくようお願いします。</p>
 <p>回答するには，それぞれの色について，${response_keys}をキーボードで押してください。</p>`,
     choices: ['次へ'],
   }
