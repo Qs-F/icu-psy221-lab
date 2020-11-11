@@ -1,5 +1,28 @@
-# Experiment Factory Experiment
+# srv `psy221.icu.dr-0x.com`
 
-Hi Friend! This is an Experiment that is friendly for use in the [Experiment Factory](https://expfactory.github.io/expfactory). You can run it locally by putting these files in a web server, or use the Experiment Factory to generate a reproducible container. Check out the documentation above for more information, or [post an issue](https://www.github.com/expfactory/expfactory/issues) if you have any questions.
+A lab service for ICU Experimental Research Method in Psychology course.
 
-![https://expfactory.github.io/expfactory/img/expfactoryticketyellow.png](https://expfactory.github.io/expfactory/img/expfactoryticketyellow.png)
+This repository provides `stroop test` codes by jsPsych.
+
+## Usage
+
+Open [https://psy221.icu.dr-0x.com](https://psy221.icu.dr-0x.com).  
+This site is deployed via Netlify.
+
+## License
+
+Partially, the code owner is different.
+
+- `index.html` and `index_light.html`
+
+Almost by @Qs-F, but Participants ID, version information, and screen size getter is owned by Naoi Nozomi.
+
+- `js/*.js` and `old_plugins/*`
+
+These codes are developed by Fuchino Yutaka, brought via [https://www.je-pense-donc-je-suis.com/](https://www.je-pense-donc-je-suis.com/).
+
+- `jspsych-6.1.0`
+
+The codes are provided by jsPsych developers, which is available as MIT License.
+
+Codes by @Qs-F and jsPsych developers are available under MIT License, but for the other parts, please contact them.
